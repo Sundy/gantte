@@ -1,1 +1,108 @@
-[]
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "学习智推时代的系统和商业模式",
+      "start": 0,
+      "duration": 1,
+      "color": "#FFE0B2",
+      "parentId": null,
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "title": "和智推时代签约",
+      "start": 0,
+      "duration": 1,
+      "color": "#FFE0B2",
+      "parentId": 1,
+      "collapsed": false
+    },
+    {
+      "id": 3,
+      "title": "到上海拜访智推时代",
+      "start": 0,
+      "duration": 1,
+      "color": "#FFE0B2",
+      "parentId": 1,
+      "collapsed": false
+    },
+    {
+      "id": 4,
+      "title": "输出智推时代的商业模式, 定价, 代理商策略, 组织结构",
+      "start": 0,
+      "duration": 1,
+      "color": "#FFE0B2",
+      "parentId": 1,
+      "collapsed": false
+    },
+    {
+      "id": 5,
+      "title": "出Demo和张总及种子客户确认",
+      "start": 1,
+      "duration": 2,
+      "color": "#FFCC80",
+      "parentId": null,
+      "collapsed": false,
+      "_number": "2"
+    },
+    {
+      "id": 6,
+      "title": "参考智推时代系统以及新榜的系统出Demo",
+      "start": 1,
+      "duration": 2,
+      "color": "#FFCC80",
+      "parentId": 5,
+      "collapsed": false,
+      "_number": "2.1"
+    },
+    {
+      "id": 7,
+      "title": "产品开发及上线",
+      "start": 3,
+      "duration": 8,
+      "color": "#FFB74D",
+      "parentId": null,
+      "collapsed": false,
+      "_number": "3"
+    },
+    {
+      "id": 8,
+      "title": "培训及寻找种子客户验证",
+      "start": 12,
+      "duration": 2,
+      "color": "#FF9800",
+      "parentId": null,
+      "collapsed": false
+    },
+    {
+      "id": 9,
+      "title": "复盘复制",
+      "start": 14,
+      "duration": 2,
+      "color": "#F57C00",
+      "parentId": null,
+      "collapsed": false
+    },
+    {
+      "id": 10,
+      "title": "核心团队组建",
+      "start": 0,
+      "duration": 5,
+      "color": "#FFA726",
+      "parentId": null,
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "title": "约见GEO创业者",
+      "start": 0,
+      "duration": 2,
+      "color": "#FFA726",
+      "parentId": 10,
+      "collapsed": false
+    }
+  ],
+  "projectStartDate": "2025-12-08",
+  "projectDurationWeeks": 12
+}

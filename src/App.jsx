@@ -35,6 +35,8 @@ function App() {
 
   const [projectStartDate, setProjectStartDate] = useState('2025-12-08')
   const [projectDurationWeeks, setProjectDurationWeeks] = useState(12)
+  
+  const isFirstRender = useRef(true)
 
   // Load from file on mount
   useEffect(() => {
@@ -54,6 +56,11 @@ function App() {
 
   // Auto-persistence
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
     
     const payload = {

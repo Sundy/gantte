@@ -13,13 +13,28 @@ const STORAGE_KEY = 'geo_gantt_data_v2'
 
 function App() {
   // --- State ---
-  const [tasks, setTasks] = useState(() => {
-    // Try to load from local storage first for immediate render
-    const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : DEFAULT_TASKS
-  })
+  const [tasks, setTasks] = useState(DEFAULT_TASKS)
+  const [projectStartDate, setProjectStartDate] = useState('2025-12-08')
+  const [projectDurationWeeks, setProjectDurationWeeks] = useState(12)
 
-
+  // Initialize state from local storage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          setTasks(parsed)
+        } else {
+          if (parsed.tasks) setTasks(parsed.tasks)
+          if (parsed.projectStartDate) setProjectStartDate(parsed.projectStartDate)
+          if (parsed.projectDurationWeeks) setProjectDurationWeeks(parsed.projectDurationWeeks)
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse local storage", e)
+    }
+  }, [])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const fileInputRef = useRef(null)
@@ -32,15 +47,12 @@ function App() {
     color: '#FFCC80',
     parentId: '' // empty string for root
   })
-
-  const [projectStartDate, setProjectStartDate] = useState('2025-12-08')
-  const [projectDurationWeeks, setProjectDurationWeeks] = useState(12)
   
   const isFirstRender = useRef(true)
 
   // Load from file on mount
   useEffect(() => {
-    fetch('http://localhost:3001/api/tasks')
+    fetch('http://localhost:3001/api/tasks', { cache: "no-store" })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -61,13 +73,13 @@ function App() {
       return
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-    
+    // Save full state to local storage
     const payload = {
       tasks,
       projectStartDate,
       projectDurationWeeks
     }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     
     fetch('http://localhost:3001/api/tasks', {
       method: 'POST',

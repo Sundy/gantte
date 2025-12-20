@@ -9,32 +9,14 @@ const DEFAULT_TASKS = [
   { id: 6, title: '核心团队组建', start: 10, duration: 2, color: '#FFA726', parentId: null, collapsed: false }
 ]
 
-const STORAGE_KEY = 'geo_gantt_data_v2'
 
 function App() {
   // --- State ---
-  const [tasks, setTasks] = useState(DEFAULT_TASKS)
+  const [tasks, setTasks] = useState([])
   const [projectStartDate, setProjectStartDate] = useState('2025-12-08')
   const [projectDurationWeeks, setProjectDurationWeeks] = useState(12)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Initialize state from local storage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed)) {
-          setTasks(parsed)
-        } else {
-          if (parsed.tasks) setTasks(parsed.tasks)
-          if (parsed.projectStartDate) setProjectStartDate(parsed.projectStartDate)
-          if (parsed.projectDurationWeeks) setProjectDurationWeeks(parsed.projectDurationWeeks)
-        }
-      }
-    } catch (e) {
-      console.error("Failed to parse local storage", e)
-    }
-  }, [])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const fileInputRef = useRef(null)
@@ -47,7 +29,7 @@ function App() {
     color: '#FFCC80',
     parentId: '' // empty string for root
   })
-  
+
   const isFirstRender = useRef(true)
 
   // Load from file on mount
@@ -62,31 +44,35 @@ function App() {
           if (data.projectStartDate) setProjectStartDate(data.projectStartDate)
           if (data.projectDurationWeeks) setProjectDurationWeeks(data.projectDurationWeeks)
         }
+        setIsLoading(false)
       })
-      .catch(err => console.error('Failed to load tasks from file:', err))
+      .catch(err => {
+        console.error('Failed to load tasks from file:', err)
+        setIsLoading(false)
+        // Fallback to defaults if server is unavailable
+        setTasks(DEFAULT_TASKS)
+      })
   }, [])
 
   // Auto-persistence
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
+    if (isLoading || isFirstRender.current) {
+      if (!isLoading) isFirstRender.current = false
       return
     }
 
-    // Save full state to local storage
     const payload = {
       tasks,
       projectStartDate,
       projectDurationWeeks
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-    
+
     fetch('http://localhost:3001/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(err => console.error('Auto-save failed:', err))
-  }, [tasks, projectStartDate, projectDurationWeeks])
+  }, [tasks, projectStartDate, projectDurationWeeks, isLoading])
 
   // --- Dynamic Weeks Calculation ---
   const totalWeeks = useMemo(() => {
@@ -210,7 +196,7 @@ function App() {
         const currentNumber = prefix ? `${prefix}.${index + 1}` : `${index + 1}`
         // Attach the calculated number to the task object for rendering
         const taskWithNumber = { ...task, _number: currentNumber }
-        
+
         result.push(taskWithNumber)
         if (!task.collapsed) {
           const children = tasks.filter(t => t.parentId === task.id)
@@ -234,7 +220,23 @@ function App() {
     display: 'grid',
     gridTemplateColumns: `300px repeat(${totalWeeks}, ${WEEK_MIN_WIDTH}px)`,
     // Ensure min-width for usability if weeks get too many
-    minWidth: `${300 + totalWeeks * WEEK_MIN_WIDTH}px` 
+    minWidth: `${300 + totalWeeks * WEEK_MIN_WIDTH}px`
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666',
+        fontFamily: 'sans-serif'
+      }}>
+        正在同步数据...
+      </div>
+    )
   }
 
   return (
@@ -329,7 +331,7 @@ function App() {
                         marginRight: '5px',
                         fontWeight: 'bold',
                         color: '#666',
-                        display: 'inline-flex', 
+                        display: 'inline-flex',
                         justifyContent: 'center',
                         flexShrink: 0,
                         marginTop: '2px'
@@ -338,7 +340,7 @@ function App() {
                       {task.collapsed ? '▶' : '▼'}
                     </span>
 
-                    <div 
+                    <div
                       onClick={() => handleEditTask(task)}
                       className="task-label-container"
                       style={{
@@ -347,14 +349,14 @@ function App() {
                         cursor: 'pointer'
                       }}
                     >
-                      <span style={{ 
-                        marginRight: '8px', 
-                        color: '#666', 
+                      <span style={{
+                        marginRight: '8px',
+                        color: '#666',
                         fontSize: '0.9em',
                         minWidth: '35px', // Ensure alignment for numbers
                         flexShrink: 0
                       }}>{task._number}</span>
-                      <span 
+                      <span
                         className="task-label-text"
                         style={{
                           fontWeight: hasChildren ? 700 : 400,
